@@ -4,37 +4,51 @@
 //#define UNICODE
 #include <Windows.h>
 #include <sstream>
+
 struct WindowData
 {
+    void (*resizeSwapChainBuffers)(HWND hwnd);
+    void* DirectXData;
     bool hasUserFocus;
 };
 
-LRESULT CALLBACK WindowEventHandler(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+static LRESULT CALLBACK WindowEventHandler(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
+
     switch (msg)
     {
     case WM_NCCREATE://case window creation
     {
         WindowData* data = new WindowData();
-        SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(data));
-        return DefWindowProc(hwnd, msg, wparam, lparam); 
+        SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(data)); 
+        return DefWindowProc(hwnd, msg, wparam, lparam);  
     }
     case WM_SETFOCUS://case user focus is on window
     {
-        WindowData* data = reinterpret_cast<WindowData*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
-        data->hasUserFocus = true;
+        WindowData* data = reinterpret_cast<WindowData*>(GetWindowLongPtr(hwnd, GWLP_USERDATA)); 
+        data->hasUserFocus = true; 
         break;
     }
     case WM_KILLFOCUS://case user focus is not on window
     {
         WindowData* data = reinterpret_cast<WindowData*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
-        data->hasUserFocus = false;
+        data->hasUserFocus = false; 
+        break;
+    }
+    case WM_SIZE:
+    {
+        WindowData* data = reinterpret_cast<WindowData*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
+        if (data->resizeSwapChainBuffers){
+            data->resizeSwapChainBuffers(hwnd);
+        }
+
         break;
     }
     default:
-        return DefWindowProc(hwnd, msg, wparam, lparam);
+        
         break;
     }
+    return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
 #define MS_ERROR(error_type, ...) \
@@ -145,3 +159,4 @@ bool MSW_HasUserFocus(void* hwnd)
     WindowData* data = reinterpret_cast<WindowData*>(GetWindowLongPtr(reinterpret_cast<HWND>(hwnd), GWLP_USERDATA)); 
     return data->hasUserFocus;
 }
+

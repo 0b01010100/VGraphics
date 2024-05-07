@@ -55,7 +55,7 @@ void DX11_init(void* hwnd, void* graphics, void* manager)
 	gem_b->createVertexShader = DX11_createVertexShader;
 
 	struct DX11RenderingDevs* rs = reinterpret_cast<DX11RenderingDevs*>(malloc(sizeof(struct DX11RenderingDevs)));
-
+	rs->hwnd = reinterpret_cast<HWND>(hwnd);
 	ge_b->renderSystem = (gem_b->renderSystem = rs);
 
 
@@ -89,7 +89,7 @@ void DX11_init(void* hwnd, void* graphics, void* manager)
 	DX11_ERROR(apdt->GetParent(__uuidof(struct IDXGIFactory), reinterpret_cast<void**>(&rs->factory)), 
 		L"Faild to get a rendering Device for DirectX 11. Device is IDXGIFactory", return);
 	//now create swapChain
-	DX11_createSwapChain(rs, reinterpret_cast<HWND>(hwnd));
+	DX11_createSwapChain(rs);
 
 	//set up defualt vertex shader and Pixel Shader for use 
 	
@@ -136,22 +136,57 @@ void DX11_init(void* hwnd, void* graphics, void* manager)
 
 	DX11_setFragmentShader(rs, psCode);
 }
+struct WindowData
+{
+	void (*resizeSwapChainBuffers)(HWND hwnd);
+	DX11RenderingDevs* DirectXData;
+	bool hasUserFocus;
 
+};
+static void DX11_resizeSwapChainBuffers(HWND hwnd)
+{
+	WindowData* data = reinterpret_cast<WindowData*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
+	//Get client size of the window 
+	RECT wr = { 0 };
+	GetClientRect(hwnd, &wr);
+	
+	data->DirectXData->sw->ResizeBuffers(1, wr.right - wr.left, wr.bottom - wr.top, DXGI_FORMAT_UNKNOWN, 0);
+
+	data->DirectXData->rtv.Reset();
+	//get 1 Buffer/Texture from the swapChain
+	struct ID3D11Texture2D* TEX = __nullptr;
+	DX11_ERROR
+	(
+		data->DirectXData->sw->GetBuffer(0U,
+			__uuidof(struct ID3D11Texture2D),
+			reinterpret_cast<void**>(&TEX)
+		), L"Faild to get a buffer from the swap chain in Win32SwapChain class\n", return);
+
+	//create render target view and give it the TEX variable, so we can draw to the Buffer/Texture
+	DX11_ERROR 
+	(
+		data->DirectXData->dev->CreateRenderTargetView(
+			TEX,
+			__nullptr,
+			&data->DirectXData->rtv
+	), L"Faild to create render target view in Win32SwapChain class", return);
+
+}
 __declspec(noinline) static
-void DX11_createSwapChain(struct DX11RenderingDevs* rs, HWND hwnd)
+void DX11_createSwapChain(struct DX11RenderingDevs* rs)
 {
 	DXGI_SWAP_CHAIN_DESC sw_desc = { 0 };
 	sw_desc.BufferCount = 1U;// one extrax buffer so two will be used. 
 
 	//Get client size of the window 
 	RECT wr = { 0 };
-	GetClientRect(hwnd, &wr);
+	GetClientRect(rs->hwnd, &wr);
 	//Adjust the Width of the window based on the Width of the client of the window 
 	sw_desc.BufferDesc.Width = wr.right - wr.left;
 	//Adjust the Height of the window based on the Height of the client of the window 
 	sw_desc.BufferDesc.Height = wr.bottom - wr.top;
 	//Set window to present frame buffers on
-	sw_desc.OutputWindow = hwnd;
+	sw_desc.OutputWindow = rs->hwnd;
 	//Yes output should be in windowed mode. 
 	sw_desc.Windowed = 1;//true
 	//Allows us to change the size of the swapchain buffer and swicth from Windowed mode to another mode
@@ -192,8 +227,15 @@ void DX11_createSwapChain(struct DX11RenderingDevs* rs, HWND hwnd)
 		rs->dev->CreateRenderTargetView(
 			TEX,
 			__nullptr,
-			&rs->rtv
+			rs->rtv.GetAddressOf()
 		), L"Faild to create render target view in Win32SwapChain class", return);
+
+
+	WindowData* de = reinterpret_cast<WindowData*>(GetWindowLongPtr(rs->hwnd, GWLP_USERDATA));
+	de->DirectXData = rs;
+	de->resizeSwapChainBuffers =  DX11_resizeSwapChainBuffers;
+
+
 	D3D11_VIEWPORT vp = { 0 };
 	vp.Width = wr.right - wr.left;
 	vp.Height = wr.bottom - wr.top;
@@ -242,32 +284,29 @@ void* DX11_createVertexShader(void* rs, const wchar_t* file_path, const char* en
 		//init the memory to zero
 		ZeroMemory(desc, sizeof(struct D3D11_INPUT_ELEMENT_DESC) * inputLayout->inputLayoutsElementCount);
 
-		for (unsigned int i = 0U; i < inputLayout->inputLayoutsElementCount;)
+		for (unsigned int i = 0U; i < inputLayout->inputLayoutsElementCount; i++)
 		{
-			if (inputLayout->inputLayouts[i] >= 2U && inputLayout->inputLayouts[i] <= 4U)
+			desc[i].Format = static_cast<DXGI_FORMAT>(inputLayout->inputLayouts[i]);
+			desc[i].AlignedByteOffset = AlignedByteOffset;
+			desc[i].SemanticName = inputLayout->inputLayoutElementNames[i];
+			if (inputLayout->inputLayouts[i] >= 2U && inputLayout->inputLayouts[i] <= 4U) 
 			{
-				desc[i].Format = static_cast<DXGI_FORMAT>(inputLayout->inputLayouts[i]);
-				desc[i].AlignedByteOffset = AlignedByteOffset;
 				//Size of (unsigned int, int, or float) = sizeof(int), amount of them used = 4
 				AlignedByteOffset += static_cast<unsigned int>(sizeof(int) * 4ULL);
+				continue;
 			}
 			else if (inputLayout->inputLayouts[i] >= 6U && inputLayout->inputLayouts[i] <= 8U)
 			{
-				desc[i].Format = static_cast<DXGI_FORMAT>(inputLayout->inputLayouts[i]);
-				desc[i].AlignedByteOffset = AlignedByteOffset;
 				//Size of (unsigned int, int, or float) = sizeof(int), amount of them used = 3
 				AlignedByteOffset += static_cast<unsigned int>(sizeof(int) * 3ULL);
+				continue;
 			}
 			else if (inputLayout->inputLayouts[i] >= 16U && inputLayout->inputLayouts[i] <= 18U)
 			{
-				desc[i].Format = static_cast<DXGI_FORMAT>(inputLayout->inputLayouts[i]);
-				desc[i].AlignedByteOffset = AlignedByteOffset;
 				//Size of (unsigned int, int, or float) = sizeof(int), amount of them used = 2
 				AlignedByteOffset += static_cast<unsigned int>(sizeof(int) * 2ULL);
+				continue;
 			}
-			desc[i].SemanticName = inputLayout->inputLayoutElementNames[i];
-
-			i++;
 		}
 
 		HRESULT hr = s->dev->CreateInputLayout(desc, inputLayout->inputLayoutsElementCount, shaderCode->GetBufferPointer(), shaderCode->GetBufferSize(), &input_layout);
@@ -320,13 +359,26 @@ __declspec(noinline) static
 void DX11_update(void* rs, float r, float g, float b, float a)
 {
 	struct DX11RenderingDevs* s = reinterpret_cast<struct DX11RenderingDevs*>(rs);
-
+	//Get client size of the window 
+	RECT wr = { 0 };
+	
 	//present to make make the render target seeable to human eyes
 	s->sw->Present(1U, 0U);
-	float color[4U] = { r,g,b,a };
+
 	//clear the color of the wholl render target to the color reprsented as [r] [g] [b] [a]
-	s->context->ClearRenderTargetView(s->rtv, color);
+	float color[4U] = { r,g,b,a };
+	s->context->ClearRenderTargetView(s->rtv.Get(), color);
 	s->context->OMSetRenderTargets(1U, &s->rtv, 0);
+
+	GetClientRect(s->hwnd, &wr);
+	D3D11_VIEWPORT vp = { 0 };
+	vp.Width = wr.right - wr.left;
+	vp.Height = wr.bottom - wr.top;
+	vp.MinDepth = 0.0f;
+	vp.MaxDepth = 1.0f;
+	s->context->RSSetViewports(1, &vp);
+
+
 }
 __declspec(noinline) static
 void DX11_setVertexShader(void* rs, void* vsCode)

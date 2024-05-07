@@ -15,6 +15,7 @@
 //allows us to be able to the the d3d11 library 
 #include <d3d11.h>
 #pragma comment(lib, "d3d11.lib")
+#include <wrl/client.h>
 //rendering devices
 struct DX11RenderingDevs
 {
@@ -25,12 +26,14 @@ struct DX11RenderingDevs
 	//Used for rendering. This struct has all the fansy function for rendering 
 	struct ID3D11DeviceContext* context;
 	//allows us to view a swapChain buffer, so we do things like render to it
-	struct ID3D11RenderTargetView* rtv;
+	Microsoft::WRL::ComPtr <struct ID3D11RenderTargetView> rtv;
 	/*An IDXGIFactory interface implements methods for generating DXGI objects
 	(which handle full screen transitions).*/
 	struct IDXGIFactory* factory;
 	//For DXGI objects that produce image data.
 	struct IDXGIDevice* idxgi_dev;
+	//Window handle
+	HWND hwnd;
 };
 
 
@@ -38,9 +41,8 @@ struct DX11RenderingDevs
 
 // //creates a DX11 swap chain
 //@param rs -> a pointer to DX11RenderingDevs struct, which will represent the DX11 rendering devices and swapChain
-//@param hwnd -> a pointer to HWND__ struct, which is an id for a window
 //We need this id in order to to tell DX11 what window should have the swapchain Buffers
-__declspec(noinline) static void DX11_createSwapChain(struct DX11RenderingDevs* rs, HWND hwnd);
+__declspec(noinline) static void DX11_createSwapChain(struct DX11RenderingDevs* rs);
 
 //create a Vertex Shader the DX11 way
 //@param rs -> a pointer to DX11RenderingDevs struct, which will represent the DX11 rendering devices and swapChain
@@ -108,7 +110,6 @@ __declspec(noinline) static void DX11_SetPrimitiveTopology(void* rs, VE::Graphic
 \
 }
 
-#include <assert.h>
 //Assert if value is null
 #define NULL_ERROR(arg, error, retvalue)\
 {\
