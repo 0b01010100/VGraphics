@@ -1,0 +1,277 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.22"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						2
+					]
+				},
+				{
+					"build" : "VG",
+					"childIndexes" : 
+					[
+						2
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-VG-Debug-664f55ecfdeaae81e607.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.22"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "VG",
+					"targetIndexes" : 
+					[
+						1
+					]
+				},
+				{
+					"build" : "VG/plugs/OGL_P",
+					"childIndexes" : 
+					[
+						3,
+						4
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-VG.plugs.OGL_P-Debug-9f1690c55fc500872f1c.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.22"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 2,
+					"source" : "VG/plugs/OGL_P",
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"build" : "bin/glad",
+					"jsonFile" : "directory-bin.glad-Debug-6e804af749d4df6e1cd8.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.22"
+					},
+					"parentIndex" : 2,
+					"projectIndex" : 3,
+					"source" : "ven/glad",
+					"targetIndexes" : 
+					[
+						3
+					]
+				},
+				{
+					"build" : "bin/glfw",
+					"childIndexes" : 
+					[
+						5,
+						6
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-bin.glfw-Debug-853e2cc0c776e3259580.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.4"
+					},
+					"parentIndex" : 2,
+					"projectIndex" : 4,
+					"source" : "ven/glfw",
+					"targetIndexes" : 
+					[
+						5
+					]
+				},
+				{
+					"build" : "bin/glfw/src",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-bin.glfw.src-Debug-00251e8922b4178b62df.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.4"
+					},
+					"parentIndex" : 4,
+					"projectIndex" : 4,
+					"source" : "ven/glfw/src",
+					"targetIndexes" : 
+					[
+						4,
+						6
+					]
+				},
+				{
+					"build" : "bin/glfw/docs",
+					"jsonFile" : "directory-bin.glfw.docs-Debug-1faab5ffb52b67b30cb7.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.4"
+					},
+					"parentIndex" : 4,
+					"projectIndex" : 4,
+					"source" : "ven/glfw/docs"
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "VGraphics",
+					"targetIndexes" : 
+					[
+						2
+					]
+				},
+				{
+					"childIndexes" : 
+					[
+						2
+					],
+					"directoryIndexes" : 
+					[
+						1
+					],
+					"name" : "VG",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						1
+					]
+				},
+				{
+					"childIndexes" : 
+					[
+						3,
+						4
+					],
+					"directoryIndexes" : 
+					[
+						2
+					],
+					"name" : "OGL_P",
+					"parentIndex" : 1,
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						3
+					],
+					"name" : "glad",
+					"parentIndex" : 2,
+					"targetIndexes" : 
+					[
+						3
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						4,
+						5,
+						6
+					],
+					"name" : "GLFW",
+					"parentIndex" : 2,
+					"targetIndexes" : 
+					[
+						4,
+						5,
+						6
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 2,
+					"id" : "OGL_P::@0cb332806ea2ee3a1f6d",
+					"jsonFile" : "target-OGL_P-Debug-f55007852486336b46d5.json",
+					"name" : "OGL_P",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "VG::@080027aa16463599beda",
+					"jsonFile" : "target-VG-Debug-6e66174bf00c0c49e3c8.json",
+					"name" : "VG",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "VGraphics::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-VGraphics-Debug-f3d2547a391a5316a7c3.json",
+					"name" : "VGraphics",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "glad::@96fa020411f03fb6a7b9",
+					"jsonFile" : "target-glad-Debug-e86deb309ff7937a6c45.json",
+					"name" : "glad",
+					"projectIndex" : 3
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "glfw::@3845cc9251eccd436d10",
+					"jsonFile" : "target-glfw-Debug-0e79561d7eca14ac643b.json",
+					"name" : "glfw",
+					"projectIndex" : 4
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "uninstall::@9eefb3bf5546950c5bb2",
+					"jsonFile" : "target-uninstall-Debug-04cdd25e7af152379e67.json",
+					"name" : "uninstall",
+					"projectIndex" : 4
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "update_mappings::@3845cc9251eccd436d10",
+					"jsonFile" : "target-update_mappings-Debug-5107385b35fcf39a98fb.json",
+					"name" : "update_mappings",
+					"projectIndex" : 4
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/josdd/repos/p/VGraphics/out/build/x64-debug",
+		"source" : "C:/Users/josdd/repos/p/VGraphics"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}

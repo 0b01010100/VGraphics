@@ -1,0 +1,6 @@
+# CMake generation dependency list for this directory.
+C:/Users/josdd/repos/p/VGraphics/out/build/x64-debug/CMakeFiles/cmake.verify_globs
+C:/Users/josdd/repos/p/VGraphics/ven/glfw-3.4/docs/CMakeLists.txt
+C:/msys64/mingw64/share/cmake/Modules/FindDoxygen.cmake
+C:/msys64/mingw64/share/cmake/Modules/FindPackageHandleStandardArgs.cmake
+C:/msys64/mingw64/share/cmake/Modules/FindPackageMessage.cmake

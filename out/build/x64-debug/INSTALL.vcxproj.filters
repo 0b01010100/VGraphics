@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\josdd\repos\p\VGraphics\out\build\x64-debug\CMakeFiles\4fef0ac64b0c8f0cd3b28dad42cb7ca0\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{067F42F9-E0BD-3D56-9828-E828105E7FFC}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

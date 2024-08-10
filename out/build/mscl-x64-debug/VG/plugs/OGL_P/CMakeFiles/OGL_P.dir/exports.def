@@ -1,0 +1,9 @@
+EXPORTS 
+	OpenGL_Init
+	OpenGL_InitResource
+	OpenGL_SetResource
+	OpenGL_UninitResource
+	__local_stdio_printf_options
+	_vfprintf_l
+	fprintf
+	printf
