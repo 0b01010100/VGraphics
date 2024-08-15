@@ -1,0 +1,35 @@
+cmake_minimum_required(VERSION 3.22)
+
+# Project name and supported languages
+project(OGL_P LANGUAGES C CXX)
+
+set(ThirdPartyFolder ${CMAKE_SOURCE_DIR}/Vendor)
+
+# Collect all source files
+file(GLOB_RECURSE OGL_P_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*.c)
+
+# Print message to verify the path
+message(STATUS "ThirdPartyFolder is set to: ${ThirdPartyFolder}")
+
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
+# Define the library
+add_library(OGL_P SHARED ${OGL_P_SOURCES})
+
+# Include directories
+target_include_directories(OGL_P PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(OGL_P PUBLIC ${ThirdPartyFolder}/glfw/include
+                                        ${ThirdPartyFolder}/glad/include)
+
+# Add subdirectories for third-party libraries
+add_subdirectory(${ThirdPartyFolder}/glfw ${CMAKE_BINARY_DIR}/glfw_build)
+add_subdirectory(${ThirdPartyFolder}/glad ${CMAKE_BINARY_DIR}/glad_build)
+# Link libraries
+target_link_libraries(OGL_P PUBLIC glfw glad)
+
+# Set output directories for the library
+set_target_properties(OGL_P PROPERTIES
+  LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin"
+  ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin"  # For static libraries, if needed
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin"  # For executables, if used
+)

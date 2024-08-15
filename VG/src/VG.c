@@ -1,8 +1,8 @@
 #include <VG.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include <stdlib.h> 
-#include <slib.h>
+#include <vnew.h>
+#include <vslib.h>
 
 typedef void (*api_init)(const char *name, int width, int height, void **vg);
 typedef int (*api_create_resource)(void* ctx, void * resource);
@@ -20,30 +20,30 @@ typedef struct VG {
 VG *VG_ctor(VG_Win config)
 {
     // Load the dynamic library
-    slib dll_so = slib_Load("OGL_P", 1, 1);
+    vslib dll_so = vslib_Load("OGL_P", 1, 1);
     if (dll_so.handle == NULL) {
         fprintf(stderr, "Failed to load library.\n");
         return NULL;
     }
 
     // Get the function pointers from the library
-    api_init ftn_init = (api_init)slib_Getpfn(&dll_so, "OpenGL_Init");
-    api_create_resource ftn_create = (api_create_resource)slib_Getpfn(&dll_so, "OpenGL_InitResource");
-    api_set_resource ftn_set = (api_set_resource)slib_Getpfn(&dll_so, "OpenGL_SetResource");
-    api_destroy_resource ftn_destroy = (api_destroy_resource)slib_Getpfn(&dll_so, "OpenGL_UninitResource");
+    api_init ftn_init = (api_init)vslib_Getpfn(&dll_so, "OpenGL_Init");
+    api_create_resource ftn_create = (api_create_resource)vslib_Getpfn(&dll_so, "OpenGL_InitResource");
+    api_set_resource ftn_set = (api_set_resource)vslib_Getpfn(&dll_so, "OpenGL_SetResource");
+    api_destroy_resource ftn_destroy = (api_destroy_resource)vslib_Getpfn(&dll_so, "OpenGL_UninitResource");
     
 
-    if (ftn_init == NULL || ftn_create == NULL || ftn_destroy == NULL) {
+    if (ftn_init == NULL || ftn_create == NULL || ftn_set == NULL || ftn_destroy == NULL) {
         fprintf(stderr, "VG_ctor: Failed to get one or more function pointers.\n");
-        slib_Unload(&dll_so);
+        vslib_Unload(&dll_so);
         return NULL;
     }
 
     // Allocate VG object
-    VG *this = (VG *)malloc(sizeof(VG));
+    VG *this = vnew(VG, 1);
     if (this == NULL) {
         fprintf(stderr, "VG_ctor: Failed to allocate memory for VG.\n");
-        slib_Unload(&dll_so);
+        vslib_Unload(&dll_so);
         return NULL;
     }
 
@@ -142,8 +142,9 @@ void VG_Clear_Buffer(VG *this_)
 
 void VG_dtor(VG *this_)
 {
-    if (!this_) return;
+    if (!this_ || !this_->api_handle) return;
     
-    slib_Unload((slib *)this_->api_handle);
-    free(this_);
+    vslib_Unload((vslib *)this_->api_handle);
+
+    vdelete(this_);
 }
