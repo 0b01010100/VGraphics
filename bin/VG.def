@@ -1,0 +1,9 @@
+LIBRARY VG
+EXPORTS
+    VG_ctor
+    VG_LoadResource
+    VG_SetResources
+    VG_UnLoadResources
+    VG_Render
+    VG_Clear_Buffer
+    VG_dtor
