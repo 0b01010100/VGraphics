@@ -11,6 +11,12 @@ extern "C" {
 //Represents the Graphics Engine
 typedef struct VG VG;
 
+//Represents Black with full opacity
+const float VG_COLOR_BLACK[4] = {0.0F, 0.0F, 0.0F, 1.0F};
+
+//Represents White with full opacity
+const float VG_COLOR_WHITE[4] = {1.0F, 1.0F, 1.0F, 1.0F};
+
 // Function Error Returns
 typedef enum VG_RESULT {
     VG_SUCCESS = 0ULL,              // Operation was successful
@@ -53,10 +59,9 @@ typedef struct VG_Resource_Desc {
     unsigned int format;        // Format of the data (e.g., pixel format, vertex format)
 } VG_Resource_Desc;
 
-#if defined(DEBUG)
+#if defined(DEBUG) || defined(_DEBUG)
 /* 
     Represents a Graphics Resource
-    @warning For Debug Mode only
 */
 typedef struct VG_Resource
 {
@@ -78,25 +83,34 @@ typedef struct VG_Win {
 } VG_Win;
 
 //Init the Graphics engine
-VG *VG_ctor(VG_Win config);
+VG *VG_Create(VG_Win config);
 
 //Create Graphics Resources
 VG_Resource* VG_LoadResource(VG *this_, VG_Resource_Desc* desc, VG_RESULT* err);
 
-//Set Graphics Resources to be used
+/* 
+    Set Graphics Resources to be used
+    @warning Do not use &. For Ex VG_SetResources(vg, 1, &Shaderprogram)
+*/
 void VG_SetResources(VG *vg, unsigned int count, ...);
 
-//Destroyes Graphics Resources
+/* 
+    Destroyes Graphics Resources
+    @warning Do not use &. For Ex VG_UnLoadResources(vg, 1, &Shaderprogram)
+*/
 void VG_UnLoadResources(VG *vg, unsigned int count, ...);
 
-//Render on to a frame buffer
-void VG_Render(VG *vg);
+//Render on to a frame buffer using RGBA Arrary
+#define VG_FrameStartA(vg, rgba) VG_FrameStart(vg, rgba[0], rgba[1], rgba[2], rgba[3])
+
+//Render on to a frame buffer using RGBA
+void VG_FrameStart(VG *vg, float r, float g, float b, float a);
 
 //Clears a frame buffer
-void VG_Clear_Buffer(VG *vg);
+void VG_FrameEnd(VG *vg);
 
 //Frees Graphics Engine
-void VG_dtor(VG *vg);
+void VG_Destroy(VG *vg);
 
 #ifdef __cplusplus
 }

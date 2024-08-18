@@ -11,6 +11,7 @@ file(GLOB_RECURSE OGL_P_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*.
 # Print message to verify the path
 message(STATUS "ThirdPartyFolder is set to: ${ThirdPartyFolder}")
 
+# Export our OGL_ functions to a .dll file
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 # Define the library

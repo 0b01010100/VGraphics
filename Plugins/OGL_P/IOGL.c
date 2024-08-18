@@ -52,6 +52,19 @@ int OGL_Init(const char *name, int width, int height, void** vg) {
     return 0;
 }
 
+void OGL_StartFrame(void* ctx, float color[4])
+{
+    glfwMakeContextCurrent((GLFWwindow*)ctx);
+    glClearColor(color[0], color[1], color[2], color[3]);
+    glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void OGL_EndFrame(void* ctx)
+{
+    glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
+    glfwSwapBuffers((GLFWwindow*)ctx);
+}
+
 int OGL_LoadResource(void* ctx, void * desc, void** out) {
     OGL_Resource_Desc *d = (OGL_Resource_Desc*)desc;
     GLenum shaderType;

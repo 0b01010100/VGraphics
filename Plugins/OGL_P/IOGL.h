@@ -45,11 +45,19 @@ typedef struct OGL_Resource OGL_Resource;
 // Function to initialize OpenGL
 int OGL_Init(const char * name, int width, int height, void** vg);
 
+// Clears the buffer with the given values
+void OGL_StartFrame(void* ctx, float color[4]);
+
+// Renders a frame
+void OGL_EndFrame(void* ctx);
+
 // Function to initialize OpenGL Resources
 int OGL_LoadResource(void* ctx, void * desc, void** out);
 
+//Set Resources to be using during rendering
 void OGL_SetResource(void* ctx, void * resource);
 
+//Destroys resources
 void OGL_UninitResource(void* ctx, void * rs);
 
 

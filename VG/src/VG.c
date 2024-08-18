@@ -5,6 +5,8 @@
 #include <vslib.h>
 
 typedef void (*api_Init)(const char *name, int width, int height, void **vg);
+typedef void (*api_FrameStart)(void* ctx, float color[4]);
+typedef void (*api_FrameEnd)(void* ctx);
 typedef int (*api_LoadResource)(void* ctx, void * desc, void** out);
 typedef void (*api_SetResource)(void* ctx, void * resource);
 typedef int (*api_DestroyResource)(void* ctx, void * resource);
@@ -12,6 +14,8 @@ typedef int (*api_DestroyResource)(void* ctx, void * resource);
 typedef struct VG {
     void *api_handle;  
     api_Init init;
+    api_FrameStart frameStart;
+    api_FrameEnd frameEnd;
     api_LoadResource resourceCtor;
     api_SetResource resourceSet;
     api_DestroyResource resourceDtor;
@@ -21,7 +25,7 @@ typedef struct VG {
 //     void * UnUsed;
 // }VG_Resource;
 
-VG *VG_ctor(VG_Win config)
+VG *VG_Create(VG_Win config)
 {
     // Load the dynamic library
     vslib dll_so = vslib_Load("OGL_P", 1, 1);
@@ -32,12 +36,14 @@ VG *VG_ctor(VG_Win config)
 
     // Get the function pointers from the library
     api_Init ftn_init = (api_Init)vslib_Getpfn(&dll_so, "OGL_Init");
+    api_FrameStart ftn_start = (api_FrameStart)vslib_Getpfn(&dll_so, "OGL_StartFrame");
+    api_FrameEnd ftn_end = (api_FrameEnd)vslib_Getpfn(&dll_so, "OGL_EndFrame");
     api_LoadResource ftn_create = (api_LoadResource)vslib_Getpfn(&dll_so, "OGL_LoadResource");
     api_SetResource ftn_set = (api_SetResource)vslib_Getpfn(&dll_so, "OGL_SetResource");
     api_DestroyResource ftn_destroy = (api_DestroyResource)vslib_Getpfn(&dll_so, "OGL_UninitResource");
     
 
-    if (ftn_init == NULL || ftn_create == NULL || ftn_set == NULL || ftn_destroy == NULL) {
+    if (ftn_init == NULL || ftn_start == NULL || ftn_end == NULL || ftn_create == NULL || ftn_set == NULL || ftn_destroy == NULL) {
         fprintf(stderr, "VG_ctor: Failed to get one or more function pointers.\n");
         vslib_Unload(&dll_so);
         return NULL;
@@ -117,19 +123,18 @@ void VG_UnLoadResources(VG *this_, unsigned int count, ...)
     va_end(args);
 }
 
-void VG_Render(VG *this_)
+void VG_FrameStart(VG *this_, float r, float g, float b, float a)
 {
-    if (!this_) return;
-    
+    float rgba[4] = {r, g, b, a};
+    this_->frameStart(this_, rgba);
 }
 
-void VG_Clear_Buffer(VG *this_)
+void VG_FrameEnd(VG *this_)
 {
-    if (!this_) return;
-    
+    this_->frameEnd(this_);
 }
 
-void VG_dtor(VG *this_)
+void VG_Destroy(VG *this_)
 {
     if (!this_ || !this_->api_handle) return;
     

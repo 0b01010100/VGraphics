@@ -1,4 +1,3 @@
-#define DEBUG
 #include <VG/inc/VG.h>
 #include <stdlib.h>
 // Vertex Shader source code
@@ -20,8 +19,10 @@ int main()
     VG_Win l = {0};
     l.height = 300;
     l.width = 300;
-    l.name = "d";
-    VG* vg = VG_ctor(l);
+    l.name = "Window";
+    VG* vg = VG_Create(l);
+
+    // SHADERS
 
     VG_Resource_Desc vs = {};
     vs.file_or_string = vertexShaderSource;
@@ -35,6 +36,8 @@ int main()
     VG_Resource* r1 = VG_LoadResource(vg, &fs, 0);
 
 
+    // SHADER PROGRAM
+
     VG_Resource_Desc sp = {};
     sp.type = VG_TYPE_SHADER_PROGRAM;
     sp.name = "BasicShaderProgram";
@@ -44,9 +47,22 @@ int main()
     shaders[1] = r1;
     sp.data = shaders;
     
-    VG_Resource* program = VG_LoadResource(vg, &sp, 0);
+    VG_Resource* ShaderProgram = VG_LoadResource(vg, &sp, 0);
 
 
-    //VG_SetResources(vg, 1, &program);
+    
+    // USE RESOURCES
+    VG_SetResources(vg, 1, ShaderProgram);
 
+    while (true)
+    {
+        VG_FrameStartA(vg, VG_COLOR_BLACK);
+
+
+        //TODO
+
+
+        VG_FrameEnd(vg);
+    }
+    
 }
