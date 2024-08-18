@@ -1,4 +1,6 @@
+#define DEBUG
 #include <VG/inc/VG.h>
+#include <stdlib.h>
 // Vertex Shader source code
 const char* vertexShaderSource = "#version 330 core\n"
 "layout (location = 0) in vec3 aPos;\n"
@@ -19,24 +21,32 @@ int main()
     l.height = 300;
     l.width = 300;
     l.name = "d";
-    VG* w = VG_ctor(l);
+    VG* vg = VG_ctor(l);
 
-    VG_Resource vs;
+    VG_Resource_Desc vs = {};
     vs.file_or_string = vertexShaderSource;
     vs.type = VG_TYPE_VERTEX;
+    VG_Resource* r = VG_LoadResource(vg, &vs, 0);
 
-    VG_Resource fs;
+
+    VG_Resource_Desc fs = {};
     fs.file_or_string = fragmentShaderSource;
     fs.type = VG_TYPE_PIXEL;
-    VG_ctor_Resources
-    (
-        w, 2, 
-        VG_Resource_Param(vs), 
-        VG_Resource_Param(fs)
-    );
-    VG_dtor_Resources(w, 2, 
-        VG_Resource_Param(vs), 
-        VG_Resource_Param(fs)
-    );
-    VG_Window_Loop(w);
+    VG_Resource* r1 = VG_LoadResource(vg, &fs, 0);
+
+
+    VG_Resource_Desc sp = {};
+    sp.type = VG_TYPE_SHADER_PROGRAM;
+    sp.name = "BasicShaderProgram";
+    sp.size = 2;
+    VG_Resource* shaders[2];
+    shaders[0] = r;
+    shaders[1] = r1;
+    sp.data = shaders;
+    
+    VG_Resource* program = VG_LoadResource(vg, &sp, 0);
+
+
+    //VG_SetResources(vg, 1, &program);
+
 }

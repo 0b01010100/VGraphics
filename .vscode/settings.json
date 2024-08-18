@@ -80,6 +80,15 @@
     "stdlib.h": "c",
     "stdarg.h": "c",
     "glfw3.h": "c",
-    "string.h": "c"
+    "string.h": "c",
+    "memory_resource": "c",
+    "chrono": "c",
+    "functional": "c",
+    "vnew.h": "c",
+    "array": "cpp",
+    "string": "cpp",
+    "string_view": "cpp",
+    "span": "cpp",
+    "format": "cpp"
   }
 }

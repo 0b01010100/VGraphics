@@ -5,6 +5,7 @@ project(VGraphics VERSION 0.1.0 LANGUAGES C CXX)
 # Include current source directory for header files
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
+
 # Add VG subdirectory
 add_subdirectory(VG)
 

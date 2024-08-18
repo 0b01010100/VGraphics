@@ -4,18 +4,22 @@
 #include <vnew.h>
 #include <vslib.h>
 
-typedef void (*api_init)(const char *name, int width, int height, void **vg);
-typedef int (*api_create_resource)(void* ctx, void * resource);
-typedef void (*api_set_resource)(void* ctx, void * resource);
-typedef int (*api_destroy_resource)(void* ctx, void * resource);
+typedef void (*api_Init)(const char *name, int width, int height, void **vg);
+typedef int (*api_LoadResource)(void* ctx, void * desc, void** out);
+typedef void (*api_SetResource)(void* ctx, void * resource);
+typedef int (*api_DestroyResource)(void* ctx, void * resource);
 
 typedef struct VG {
     void *api_handle;  
-    api_init init;
-    api_create_resource resourceCtor;
-    api_set_resource resourceSet;
-    api_destroy_resource resourceDtor;
+    api_Init init;
+    api_LoadResource resourceCtor;
+    api_SetResource resourceSet;
+    api_DestroyResource resourceDtor;
 } VG;
+
+// typedef struct VG_Resource{
+//     void * UnUsed;
+// }VG_Resource;
 
 VG *VG_ctor(VG_Win config)
 {
@@ -27,10 +31,10 @@ VG *VG_ctor(VG_Win config)
     }
 
     // Get the function pointers from the library
-    api_init ftn_init = (api_init)vslib_Getpfn(&dll_so, "OpenGL_Init");
-    api_create_resource ftn_create = (api_create_resource)vslib_Getpfn(&dll_so, "OpenGL_InitResource");
-    api_set_resource ftn_set = (api_set_resource)vslib_Getpfn(&dll_so, "OpenGL_SetResource");
-    api_destroy_resource ftn_destroy = (api_destroy_resource)vslib_Getpfn(&dll_so, "OpenGL_UninitResource");
+    api_Init ftn_init = (api_Init)vslib_Getpfn(&dll_so, "OGL_Init");
+    api_LoadResource ftn_create = (api_LoadResource)vslib_Getpfn(&dll_so, "OGL_LoadResource");
+    api_SetResource ftn_set = (api_SetResource)vslib_Getpfn(&dll_so, "OGL_SetResource");
+    api_DestroyResource ftn_destroy = (api_DestroyResource)vslib_Getpfn(&dll_so, "OGL_UninitResource");
     
 
     if (ftn_init == NULL || ftn_create == NULL || ftn_set == NULL || ftn_destroy == NULL) {
@@ -59,30 +63,27 @@ VG *VG_ctor(VG_Win config)
 }
 
 
-VG_RESULT VG_ctor_Resources(VG *this_, unsigned char count, ...) {
+VG_Resource* VG_LoadResource(VG *this_, VG_Resource_Desc* desc, VG_RESULT* err) 
+{
+    VG_RESULT e = 0;
     if (!this_ || !this_->resourceCtor) {
-        return VG_ERROR_INVALID_PARAMETER;
+        e =  VG_ERROR_INVALID_PARAMETER;
+        if(err) *err = e;
+        return NULL;
     }
 
-    va_list args;
-    va_start(args, count);
-
-    for (unsigned char i = 0; i < count; i++) {
-        VG_Resource* resource = va_arg(args, VG_Resource*);
-
-        int result =this_->resourceCtor(this_->api_handle, resource);
-        if (result != 0) {
-            va_end(args);
-            return VG_ERROR_OUT_OF_MEMORY;  
-        }
+    VG_Resource* out = NULL;
+    e = this_->resourceCtor(this_->api_handle, desc, (void**)&out);
+    if (err && err != 0) {
+        e  = VG_ERROR_OUT_OF_MEMORY; 
+        if(err) *err = e;
+        return NULL;
     }
-
-    va_end(args);
-    return VG_SUCCESS;
+    return out;
 }
 
 
-void VG_Set_Resources(VG *this_, unsigned char count, ...)
+void VG_SetResources(VG *this_, unsigned int count, ...)
 {
     if (!this_ || !this_->resourceSet) {
         return;
@@ -92,17 +93,14 @@ void VG_Set_Resources(VG *this_, unsigned char count, ...)
     va_start(args, count);
 
     for (unsigned char i = 0; i < count; i++) {
-        VG_Resource* resource = va_arg(args, VG_Resource*);
-
-        
+        VG_Resource* resource = va_arg(args, VG_Resource*);      
         this_->resourceSet(this_->api_handle, resource);
-
     }
 
     va_end(args);
 }
 
-void VG_dtor_Resources(VG *this_, unsigned char count, ...)
+void VG_UnLoadResources(VG *this_, unsigned int count, ...)
 {
     if (!this_ || !this_->resourceDtor) {
         return;
@@ -113,20 +111,11 @@ void VG_dtor_Resources(VG *this_, unsigned char count, ...)
 
     for (unsigned char i = 0; i < count; i++) {
         VG_Resource* resource = va_arg(args, VG_Resource*);
-
-        
         this_->resourceDtor(this_->api_handle, resource);
     }
 
     va_end(args);
 }
-
-void VG_Window_Loop(VG *this_)
-{
-    if (!this_) return;
-    
-}
-
 
 void VG_Render(VG *this_)
 {

@@ -1,25 +1,33 @@
 #include <IOGL.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <stdlib.h>
 #include <stdio.h>
-// Function to initialize OpenGL
+#include <stddef.h>
 
-int OpenGL_Init(const char *name, int width, int height, void** vg) {
+typedef struct OGL_Resource
+{
+    OGL_Resource_Desc desc;
+    GLuint data[4];
+} OGL_Resource;
+
+int OGL_Init(const char *name, int width, int height, void** vg) {
     // Initialize GLFW
     if (!glfwInit()) {
-        fprintf(stderr, "FAILED to initialize GLFW\n");
+        fprintf(stderr, "Error: Failed to initialize GLFW\n");
         return -1;
     }
 
     // Set OpenGL version and profile
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // 3
+                                                    //.
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);  //3
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // Create GLFW window
     GLFWwindow* window = glfwCreateWindow(width, height, name, NULL, NULL);
     if (!window) {
-        fprintf(stderr, "FAILED to create GLFW window\n");
+        fprintf(stderr, "Error: Failed to create GLFW window\n");
         glfwTerminate();
         return -1;
     }
@@ -28,7 +36,7 @@ int OpenGL_Init(const char *name, int width, int height, void** vg) {
 
     // Load OpenGL functions using glad
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        fprintf(stderr, "FAILED to initialize GLAD\n");
+        fprintf(stderr, "Error: Failed to initialize GLAD\n");
         glfwDestroyWindow(window);
         glfwTerminate();
         return -1;
@@ -36,7 +44,7 @@ int OpenGL_Init(const char *name, int width, int height, void** vg) {
 
     glViewport(0, 0, width, height);
 
-    // Store context in vg 
+    // Store context in vg
     if (vg) {
         *vg = (void*)window;
     }
@@ -44,89 +52,140 @@ int OpenGL_Init(const char *name, int width, int height, void** vg) {
     return 0;
 }
 
-typedef struct OGL_Resource {
-    unsigned int api_specific_data[4];
-    const char * file_or_string;
-    OGL_TYPE type;
-} OGL_Resource;
+int OGL_LoadResource(void* ctx, void * desc, void** out) {
+    OGL_Resource_Desc *d = (OGL_Resource_Desc*)desc;
+    GLenum shaderType;
+    GLuint shader;
+    GLint compileStatus;
+    char log[512];
 
-int OpenGL_InitResource(void* ctx, void *resource)
-{
-    OGL_Resource *res = (OGL_Resource *)resource;
-
-    switch (res->type)
+    switch (d->type) 
     {
     case OGL_TYPE_VERTEX:
     case OGL_TYPE_PIXEL:
-    {
-        printf("OGL is creating shader resource\n");
-        GLenum shaderType = (res->type == OGL_TYPE_VERTEX) ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER;
+        printf("OGL is creating Shader Resource\n");
+        shaderType = (d->type == OGL_TYPE_VERTEX) ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER;
 
-        // Create the shader
-        GLuint shader = glCreateShader(shaderType);
+        shader = glCreateShader(shaderType);
         if (shader == 0) {
-            fprintf(stderr, "OGL Failed to create shader.\n");
+            fprintf(stderr, "Error: Failed to create shader (type %d)\n", d->type);
             return -1;
         }
 
-        glShaderSource(shader, 1, &res->file_or_string, NULL);
-
+        glShaderSource(shader, 1, &d->file_or_string, NULL);
         glCompileShader(shader);
 
-        GLint compileStatus;
         glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
         if (compileStatus != GL_TRUE) {
-            char log[512];
             glGetShaderInfoLog(shader, sizeof(log), NULL, log);
-            fprintf(stderr, "OGL Shader compilation failed: %s\n", log);
+            fprintf(stderr, "Error: Shader compilation failed (type %d): %s\n", d->type, log);
             glDeleteShader(shader);
             return -1;
         }
+
+        *out = calloc(1,sizeof(OGL_Resource));
         
-        res->api_specific_data[0] = shader;
+        if (!*out) {
+            fprintf(stderr, "Error: Memory allocation failed\n");
+            glDeleteShader(shader);
+            return -1;
+        }
+
+        ((OGL_Resource*)(*out))->data[0] = shader;
+        ((OGL_Resource*)(*out))->desc = *d;
+        printf("OGL Shader created Successfully\n");
+        return 0;
         break;
-    }
+    case OGL_TYPE_SHADER_PROGRAM:
+        printf("OGL is creating a shader program resource\n");
+        if (!d->data || d->size == 0) {
+            fprintf(stderr, "Error: No shaders provided for program\n");
+            return -1;
+        }
+
+        GLuint shaderProgram = glCreateProgram();
+        if (shaderProgram == 0) {
+            fprintf(stderr, "Error: Failed to create shader program\n");
+            return -1;
+        }
+        
+        OGL_Resource** data = (OGL_Resource**)d->data;
+
+        for (size_t i = 0; i < d->size; i++) {
+        if (!data[i]) {
+            fprintf(stderr, "Error: Shader %zu is NULL\n", i);
+            glDeleteProgram(shaderProgram);
+            return -1;
+        }
+        glAttachShader(shaderProgram, data[i]->data[0]);
+        }
+
+        //Link all the shaders together into the Shader Program
+        glLinkProgram(shaderProgram);
+
+        GLint linkStatus;
+        glGetProgramiv(shaderProgram, GL_LINK_STATUS, &linkStatus);
+        if (linkStatus != GL_TRUE) {
+            glGetProgramInfoLog(shaderProgram, sizeof(log), NULL, log);
+            fprintf(stderr, "Error: Shader program linking failed: %s\n", log);
+            glDeleteProgram(shaderProgram);
+            return -1;
+        }
+
+        *out = (unsigned char*)malloc(sizeof(OGL_Resource));
+        if (!*out) {
+            fprintf(stderr, "Error: Memory allocation failed\n");
+            glDeleteProgram(shaderProgram);
+            return -1;
+        }
+
+        ((OGL_Resource*)(*out))->data[0] = shaderProgram;
+        ((OGL_Resource*)(*out))->desc = *d;
+         printf("OGL Shader Program created Successfully\n");
+        return 0;
+        break;
     default:
-        fprintf(stderr, "OGL Faild to create shader.\n");
-        fprintf(stderr, "Unknown resource type.\n");
+        fprintf(stderr, "Error: Unknown resource type %d\n", d->type);
         return -1;
     }
-    printf("OGL created shader resource.\n");
-    return 0;
 }
 
-void OpenGL_SetResource(void* ctx, void * resource)
-{
-    OGL_Resource *res = (OGL_Resource *)resource;
-    
-    switch (res->type) {
+void OGL_SetResource(void* ctx, void* rs) {
+    OGL_Resource* r = (OGL_Resource*)rs;
+
+    switch (r->desc.type) {
     case OGL_TYPE_VERTEX:
     case OGL_TYPE_PIXEL:
-
+        fprintf(stderr, "Error: Cannot set shader resource directly. Use shader programs.\n");
+        break;
+    case OGL_TYPE_SHADER_PROGRAM:
+        glUseProgram(r->data[0]);
         break;
     default:
-        fprintf(stderr, "OGL Failed to set resource.\n");
-        fprintf(stderr, "Unknown resource type.\n");
+        fprintf(stderr, "Error: Unknown resource type %d\n", r->desc.type);
         break;
     }
-
 }
 
-void OpenGL_UninitResource(void* ctx, void *resource)
-{
-    OGL_Resource *res = (OGL_Resource *)resource;
+void OGL_UninitResource(void* ctx, void * rs) {
+    OGL_Resource* r = (OGL_Resource*)rs;
 
-    switch (res->type) {
+    switch (r->desc.type) {
     case OGL_TYPE_VERTEX:
     case OGL_TYPE_PIXEL:
-        if (res->api_specific_data[0]) {
-            glDeleteShader(res->api_specific_data[0]);
-            res->api_specific_data[0] = 0;
+        if (r->data[0]) {
+            glDeleteShader(r->data[0]);
+            r->data[0] = 0;
+        }
+        break;
+    case OGL_TYPE_SHADER_PROGRAM:
+        if (r->data[0]) {
+            glDeleteProgram(r->data[0]);
+            r->data[0] = 0;
         }
         break;
     default:
-        fprintf(stderr, "OGL Failed to uninit resource.\n");
-        fprintf(stderr, "Unknown resource type.\n");
+        fprintf(stderr, "Error: Unknown resource type %d\n", r->desc.type);
         break;
     }
 }
