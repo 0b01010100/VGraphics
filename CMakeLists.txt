@@ -9,7 +9,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 add_subdirectory(VG)
 
 # Define the executable
-add_executable(VGraphics main.cpp)
+add_executable(VGraphics main.c)
 
 # Link the VG library to the VGraphics executable
 target_link_libraries(VGraphics PUBLIC VG)

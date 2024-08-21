@@ -14,15 +14,17 @@ typedef enum OGL_TYPE {
     OGL_TYPE_PIXEL,                            // Pixel data (e.g., textures)
     OGL_TYPE_GEO,                              // Geometry shader (for geometry processing)
     OGL_TYPE_COMP,                             // Compute shader (for general-purpose computing on the GPU)
+    OGL_TYPE_TESSELLATION_CONTROL_SHADER,      // Tessellation control shader (for controlling tessellation levels)
+    OGL_TYPE_TESSELLATION_EVALUATION_SHADER,    // Tessellation evaluation shader (for evaluating tessellated vertices)
     OGL_TYPE_SHADER_PROGRAM,                   // Complete shader program consisting of multiple shaders (e.g., vertex, fragment, etc.)
     OGL_TYPE_UNIFORM_BUFFER,                   // Uniform buffer object (for passing uniform data to shaders)
     OGL_TYPE_SAMPLER,                          // Sampler object (for controlling how textures are sampled in shaders)
     OGL_TYPE_PIPELINE,                         // Rendering pipeline object (encapsulates shader stages and configurations)
     OGL_TYPE_RENDERBUFFER,                     // Renderbuffer object (used for offscreen rendering, typically for depth/stencil buffers)
     OGL_TYPE_MATERIAL,                         // Material properties (may include references to textures, shaders, and other resources)
-    OGL_TYPE_TEXTURE,                          // Texture object (2D, 3D, or cubemap textures)
-    OGL_TYPE_TESSELLATION_CONTROL_SHADER,      // Tessellation control shader (for controlling tessellation levels)
-    OGL_TYPE_TESSELLATION_EVALUATION_SHADER    // Tessellation evaluation shader (for evaluating tessellated vertices)
+    OGL_TYPE_TEX1D,                            //Texture object (1D)
+    OGL_TYPE_TEX2D,                            //Texture object (2D)
+    OGL_TYPE_TEX3D,                            //Texture object (3D)
 } OGL_TYPE;
 
 //OGL resource desc

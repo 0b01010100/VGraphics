@@ -89,6 +89,7 @@
     "string": "cpp",
     "string_view": "cpp",
     "span": "cpp",
-    "format": "cpp"
+    "format": "cpp",
+    "vslib.h": "c"
   }
 }

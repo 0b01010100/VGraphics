@@ -67,7 +67,7 @@ void OGL_EndFrame(void* ctx)
 
 int OGL_LoadResource(void* ctx, void * desc, void** out) {
     OGL_Resource_Desc *d = (OGL_Resource_Desc*)desc;
-    GLenum shaderType;
+    GLenum shaderType = 0;
     GLuint shader;
     GLint compileStatus;
     char log[512];

@@ -7,9 +7,9 @@
 typedef void (*api_Init)(const char *name, int width, int height, void **vg);
 typedef void (*api_FrameStart)(void* ctx, float color[4]);
 typedef void (*api_FrameEnd)(void* ctx);
-typedef int (*api_LoadResource)(void* ctx, void * desc, void** out);
+typedef int  (*api_LoadResource)(void* ctx, void * desc, void** out);
 typedef void (*api_SetResource)(void* ctx, void * resource);
-typedef int (*api_DestroyResource)(void* ctx, void * resource);
+typedef int  (*api_DestroyResource)(void* ctx, void * resource);
 
 typedef struct VG {
     void *api_handle;  
@@ -25,7 +25,7 @@ typedef struct VG {
 //     void * UnUsed;
 // }VG_Resource;
 
-VG *VG_Create(VG_Win config)
+VG *VG_Create(const char *name, int width, int height)
 {
     // Load the dynamic library
     vslib dll_so = vslib_Load("OGL_P", 1, 1);
@@ -44,7 +44,7 @@ VG *VG_Create(VG_Win config)
     
 
     if (ftn_init == NULL || ftn_start == NULL || ftn_end == NULL || ftn_create == NULL || ftn_set == NULL || ftn_destroy == NULL) {
-        fprintf(stderr, "VG_ctor: Failed to get one or more function pointers.\n");
+        fprintf(stderr, "VG_Create: Failed to get one or more function pointers.\n");
         vslib_Unload(&dll_so);
         return NULL;
     }
@@ -52,18 +52,20 @@ VG *VG_Create(VG_Win config)
     // Allocate VG object
     VG *this = vnew(VG, 1);
     if (this == NULL) {
-        fprintf(stderr, "VG_ctor: Failed to allocate memory for VG.\n");
+        fprintf(stderr, "VG_Create: Failed to allocate memory for VG.\n");
         vslib_Unload(&dll_so);
         return NULL;
     }
 
     // Init VG object
     this->init = ftn_init;
+    this->frameStart = ftn_start;
+    this->frameEnd = ftn_end;
     this->resourceCtor = ftn_create;
     this->resourceSet = ftn_set;
     this->resourceDtor = ftn_destroy;
     this->api_handle = NULL; 
-    this->init(config.name, config.width, config.height, &this->api_handle);
+    this->init(name, width, height, &this->api_handle);
     
     return this; 
 }
