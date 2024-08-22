@@ -9,7 +9,9 @@
             "installDir": "${sourceDir}/out/install/${presetName}",
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "clang.exe",
-                "CMAKE_CXX_COMPILER": "clang++.exe"
+                "CMAKE_CXX_COMPILER": "clang++.exe",
+                "CMAKE_CXX_FLAGS": "-DDEBUG -DCLANG_VERSION",
+                "CMAKE_C_FLAGS": "-DDEBUG -DCLANG_VERSION"
             },
             "condition": {
                 "type": "equals",
@@ -27,7 +29,9 @@
                 "strategy": "external"
             },
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_FLAGS": "-DDEBUG",
+                "CMAKE_C_FLAGS": "-DDEBUG"
             }
         },
         
@@ -36,7 +40,9 @@
             "displayName": "Clang x64 Release",
             "inherits": "clang-x64-debug",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_CXX_FLAGS": "-DRELEASE",
+                "CMAKE_C_FLAGS": "-DRELEASE"
             }
         },
         
@@ -49,7 +55,9 @@
                 "strategy": "external"
             },
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_FLAGS": "-DDEBUG",
+                "CMAKE_C_FLAGS": "-DDEBUG"
             }
         },
         
@@ -58,7 +66,9 @@
             "displayName": "Clang x86 Release",
             "inherits": "clang-x86-debug",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_CXX_FLAGS": "-DRELEASE",
+                "CMAKE_C_FLAGS": "-DRELEASE"
             }
         },
 
@@ -70,7 +80,9 @@
             "installDir": "${sourceDir}/out/install/${presetName}",
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "gcc.exe",
-                "CMAKE_CXX_COMPILER": "g++.exe"
+                "CMAKE_CXX_COMPILER": "g++.exe",
+                "CMAKE_CXX_FLAGS": "-DDEBUG -DMINGW_VERSION",
+                "CMAKE_C_FLAGS": "-DDEBUG -DMINGW_VERSION"
             },
             "condition": {
                 "type": "equals",
@@ -87,7 +99,9 @@
                 "strategy": "external"
             },
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_FLAGS": "-DDEBUG",
+                "CMAKE_C_FLAGS": "-DDEBUG"
             }
         },
         {
@@ -95,7 +109,9 @@
             "displayName": "mingw-x64 Release",
             "inherits": "mingw-x64-debug",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_CXX_FLAGS": "-DRELEASE",
+                "CMAKE_C_FLAGS": "-DRELEASE"
             }
         },
         {
@@ -107,7 +123,9 @@
                 "strategy": "external"
             },
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_FLAGS": "-DDEBUG",
+                "CMAKE_C_FLAGS": "-DDEBUG"
             }
         },
         {
@@ -115,7 +133,9 @@
             "displayName": "mingw-x86 Release",
             "inherits": "mingw-x86-debug",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_CXX_FLAGS": "-DRELEASE",
+                "CMAKE_C_FLAGS": "-DRELEASE"
             }
         },
 
@@ -127,7 +147,9 @@
             "installDir": "${sourceDir}/out/install/${presetName}",
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "cl.exe",
-                "CMAKE_CXX_COMPILER": "cl.exe"
+                "CMAKE_CXX_COMPILER": "cl.exe",
+                "CMAKE_CXX_FLAGS": "/DDEBUG /DMSCL_VERSION",
+                "CMAKE_C_FLAGS": "/DDEBUG /DMSCL_VERSION"
             },
             "condition": {
                 "type": "equals",
@@ -144,7 +166,9 @@
                 "strategy": "external"
             },
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_FLAGS": "/DDEBUG",
+                "CMAKE_C_FLAGS": "/DDEBUG"
             }
         },
         {
@@ -152,7 +176,9 @@
             "displayName": "mscl-x64 Release",
             "inherits": "mscl-x64-debug",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_CXX_FLAGS": "/DRELEASE",
+                "CMAKE_C_FLAGS": "/DRELEASE"
             }
         },
         {
@@ -164,7 +190,9 @@
                 "strategy": "external"
             },
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_FLAGS": "/DDEBUG",
+                "CMAKE_C_FLAGS": "/DDEBUG"
             }
         },
         {
@@ -172,7 +200,9 @@
             "displayName": "mscl-x86 Release",
             "inherits": "mscl-x86-debug",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_CXX_FLAGS": "/DRELEASE",
+                "CMAKE_C_FLAGS": "/DRELEASE"
             }
         },
     
@@ -183,7 +213,9 @@
             "binaryDir": "${sourceDir}/out/build/${presetName}",
             "installDir": "${sourceDir}/out/install/${presetName}",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_FLAGS": "-DDEBUG",
+                "CMAKE_C_FLAGS": "-DDEBUG"
             },
             "condition": {
                 "type": "equals",
@@ -203,7 +235,9 @@
             "binaryDir": "${sourceDir}/out/build/${presetName}",
             "installDir": "${sourceDir}/out/install/${presetName}",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_FLAGS": "-DDEBUG",
+                "CMAKE_C_FLAGS": "-DDEBUG"
             },
             "condition": {
                 "type": "equals",
