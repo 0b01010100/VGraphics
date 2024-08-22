@@ -65,7 +65,7 @@ void OGL_EndFrame(void* ctx)
     glfwSwapBuffers((GLFWwindow*)ctx);
 }
 
-int OGL_LoadResource(void* ctx, void * desc, void** out) {
+OGL_RESULT OGL_LoadResource(void* ctx, void * desc, void** out) {
     OGL_Resource_Desc *d = (OGL_Resource_Desc*)desc;
     GLenum shaderType = 0;
     GLuint shader;
@@ -78,14 +78,54 @@ int OGL_LoadResource(void* ctx, void * desc, void** out) {
     case OGL_TYPE_PIXEL:
         printf("OGL is creating Shader Resource\n");
         shaderType = (d->type == OGL_TYPE_VERTEX) ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER;
+        char* buffer = NULL;
+        if(d->format == OGL_SORUCE_FORMAT_FILE)
+        {
+            FILE* file = fopen(d->file_or_string, "rb");
+            if (!file) {
+                fprintf(stderr, "Unable to open file %s\n", d->file_or_string);
+                return OGL_ERROR_CANT_OPEN_FILE;
+            }
+            fseek(file, 0, SEEK_END);
+            long length = ftell(file);
+            fseek(file, 0, SEEK_SET);
 
+            buffer = (char*)malloc(length + 1);
+            if (!buffer) {
+                fprintf(stderr, "Memory allocation failed\n");
+                fclose(file);
+                return OGL_ERROR_OUT_OF_MEMORY;
+            }
+
+            size_t readSize = fread(buffer, 1, length, file);
+            if (readSize != length) {
+                fprintf(stderr, "Error: Failed to read the entire file %s\n", d->file_or_string);
+                fclose(file);
+                free(buffer);
+                return OGL_ERROR_FILE_READ;
+            }
+
+            buffer[length] = '\0';
+            fclose(file);
+        }else
+        {
+            buffer = (char*)d->file_or_string;
+        }
+        
         shader = glCreateShader(shaderType);
         if (shader == 0) {
             fprintf(stderr, "Error: Failed to create shader (type %d)\n", d->type);
-            return -1;
+            return OGL_ERROR_FILE_READ;
         }
+        /*
+            Avoiding this warning:
 
-        glShaderSource(shader, 1, &d->file_or_string, NULL);
+            warning: passing 'char **' to parameter of type 'const GLchar *const *' (aka 'const char *const *') 
+            discards qualifiers in nested pointer types [-Wincompatible-pointer-types-discards-qualifiers]
+            [build]   121 |         glShaderSource(shader, 1, &buffer, NULL);
+        */
+        const char * const_buffer = buffer;
+        glShaderSource(shader, 1, &const_buffer, NULL);
         glCompileShader(shader);
 
         glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
@@ -93,7 +133,7 @@ int OGL_LoadResource(void* ctx, void * desc, void** out) {
             glGetShaderInfoLog(shader, sizeof(log), NULL, log);
             fprintf(stderr, "Error: Shader compilation failed (type %d): %s\n", d->type, log);
             glDeleteShader(shader);
-            return -1;
+            return OGL_ERROR_SHADER_COMPILE;
         }
 
         *out = calloc(1,sizeof(OGL_Resource));
@@ -101,25 +141,25 @@ int OGL_LoadResource(void* ctx, void * desc, void** out) {
         if (!*out) {
             fprintf(stderr, "Error: Memory allocation failed\n");
             glDeleteShader(shader);
-            return -1;
+            return OGL_ERROR_OUT_OF_MEMORY;
         }
 
         ((OGL_Resource*)(*out))->data[0] = shader;
         ((OGL_Resource*)(*out))->desc = *d;
         printf("OGL Shader created Successfully\n");
-        return 0;
+        return OGL_SUCCESS;
         break;
     case OGL_TYPE_SHADER_PROGRAM:
         printf("OGL is creating a shader program resource\n");
         if (!d->data || d->size == 0) {
             fprintf(stderr, "Error: No shaders provided for program\n");
-            return -1;
+            return OGL_ERROR_INVALID_PARAMETER;
         }
 
         GLuint shaderProgram = glCreateProgram();
         if (shaderProgram == 0) {
             fprintf(stderr, "Error: Failed to create shader program\n");
-            return -1;
+            return OGL_ERROR_CREATION;
         }
         
         OGL_Resource** data = (OGL_Resource**)d->data;
@@ -128,7 +168,7 @@ int OGL_LoadResource(void* ctx, void * desc, void** out) {
         if (!data[i]) {
             fprintf(stderr, "Error: Shader %zu is NULL\n", i);
             glDeleteProgram(shaderProgram);
-            return -1;
+            return OGL_ERROR_NULL;
         }
         glAttachShader(shaderProgram, data[i]->data[0]);
         }
@@ -142,24 +182,24 @@ int OGL_LoadResource(void* ctx, void * desc, void** out) {
             glGetProgramInfoLog(shaderProgram, sizeof(log), NULL, log);
             fprintf(stderr, "Error: Shader program linking failed: %s\n", log);
             glDeleteProgram(shaderProgram);
-            return -1;
+            return OGL_ERROR_SHADER_LINK;
         }
 
         *out = (unsigned char*)malloc(sizeof(OGL_Resource));
         if (!*out) {
             fprintf(stderr, "Error: Memory allocation failed\n");
             glDeleteProgram(shaderProgram);
-            return -1;
+            return OGL_ERROR_OUT_OF_MEMORY;
         }
 
         ((OGL_Resource*)(*out))->data[0] = shaderProgram;
         ((OGL_Resource*)(*out))->desc = *d;
-         printf("OGL Shader Program created Successfully\n");
-        return 0;
+        printf("OGL Shader Program created Successfully\n");
+        return OGL_SUCCESS;
         break;
     default:
         fprintf(stderr, "Error: Unknown resource type %d\n", d->type);
-        return -1;
+        return OGL_ERROR_INVALID_PARAMETER;
     }
 }
 

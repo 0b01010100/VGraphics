@@ -34,11 +34,19 @@ const float VG_COLOR_BLACK[4] = {0.0F, 0.0F, 0.0F, 1.0F};
 const float VG_COLOR_WHITE[4] = {1.0F, 1.0F, 1.0F, 1.0F};
 
 // Function Error Returns
-typedef enum VG_RESULT {
-    VG_SUCCESS = 0,                   // 0: Operation was successful
-    VG_ERROR_INVALID_PARAMETER = -1,  //-1: One or more parameters are invalid
-    VG_ERROR_OUT_OF_MEMORY = -2,      //-2: Memory allocation failed
-    VG_ERROR_UNKNOWN = -3             //-3: An unknown error occurred
+typedef enum VG_RESULT/* : int*/
+{
+    VG_SUCCESS                 = 0x0,//0: Operation was successful
+    VG_ERROR_NULL              = -1,//-1: NULL
+    VG_ERROR_INVALID_PARAMETER = -2,//-2: One or more parameters are invalid
+    VG_ERROR_OUT_OF_MEMORY     = -3,//-3: Memory allocation failed
+    VG_ERROR_CANT_OPEN_FILE    = -4,//-4: Cannot open file for reading
+    VG_ERROR_FILE_READ         = -5,//-5: Error occurred while reading the file
+    VG_ERROR_SHADER_COMPILE    = -6,//-6: Shader compilation failed
+    VG_ERROR_PARSING           = -6,//-6 Faild to parse source
+    VG_ERROR_SHADER_LINK       = -7,//-7 Faild to link shader
+    VG_ERROR_CREATION          = -8,//-8: Resource creation faild
+    VG_ERROR_UNKNOWN           = -9 //-9: An unknown error occurred
 } VG_RESULT;
 
 // Resource Types
@@ -62,13 +70,26 @@ typedef enum VG_TYPE {
     VG_TYPE_TEX3D,                            //Texture object (3D)
 } VG_TYPE;
 
-enum VG_TEX_FORMAT
+/*
+    Formats of resource soruce
+*/
+typedef enum VG_SORUCE_FORMAT
 {
-    
+    // Flag for if the source is a file
+    VG_SORUCE_FORMAT_FILE = 0x0,
+    // Flag for if the source is a string
+    VG_SORUCE_FORMAT_STRING
+}VG_SORUCE_FORMAT;
+
+/*
+    Data Formats
+*/
+typedef enum VG_FORMAT
+{
     VG_RGBA8,   //8 bits per channel for Red, Green, Blue, and Alpha
     VG_RGB8,    //8 bits per channel for Red, Green, and Blue (no Alpha)
     VG_R8,      //8 bits for a single Red channel.
-};
+}VG_FORMAT;
 
 //Resource Descriptors 
 typedef struct VG_Resource_Desc {
@@ -106,6 +127,26 @@ extern "C" {
 #endif
 
 /**
+ * @brief A C style constructor for Pixel Shader descriptor.
+ * 
+ * This function initializes a `VG_Resource_Desc` structure for a pixel shader.
+ * @param type The type of shader to use
+ * @param file_or_string A string containing either the file path or the shader code.
+ * @param is_file non-zero indicates that `file_or_string` is a file path, and zero indicates it's a string of shader code.
+ * @param str_id A string identifier for the shader resource.
+ * 
+ * @return VG_Resource_Desc A descriptor for the pixel shader resource.
+*/
+static inline VG_Resource_Desc VG_SHADER_DESC(VG_TYPE type, const char * file_or_string, VG_SORUCE_FORMAT src_format, const char * str_id){ 
+    VG_Resource_Desc desc = VG_default;
+    desc.type = type;
+    desc.file_or_string = file_or_string;
+    desc.str_id = str_id;
+    desc.format = src_format;
+    return desc;
+}
+
+/**
  * @brief A C style constructor for Vertex Shader descriptor.
  * 
  * This function initializes a `VG_Resource_Desc` structure for a vertex shader.
@@ -116,14 +157,8 @@ extern "C" {
  * 
  * @return VG_Resource_Desc A descriptor for the vertex shader resource.
 */
-static inline VG_Resource_Desc VG_VSHADER_DESC(const char * file_or_string, VG_BOOL is_file, const char * str_id){ 
-    VG_Resource_Desc desc = VG_default;
-    desc.type = VG_TYPE_VERTEX;
-    desc.str_id = str_id;
-    desc.size = (is_file)? VG_NONE : strlen(file_or_string);
-    desc.file_or_string = file_or_string;
-    return desc;
-}
+#define VG_VSHADER_DESC(file_or_string, src_format, str_id)\
+    VG_SHADER_DESC(VG_TYPE_VERTEX, file_or_string, src_format, str_id)
 
 /**
  * @brief A C style constructor for Pixel Shader descriptor.
@@ -136,15 +171,8 @@ static inline VG_Resource_Desc VG_VSHADER_DESC(const char * file_or_string, VG_B
  * 
  * @return VG_Resource_Desc A descriptor for the pixel shader resource.
 */
-static inline VG_Resource_Desc VG_PSHADER_DESC(const char * file_or_string, VG_BOOL is_file, const char * str_id){ 
-    VG_Resource_Desc desc = VG_default;
-    desc.type = VG_TYPE_PIXEL;
-    desc.str_id = str_id;
-    desc.size = (is_file)? VG_NONE : strlen(file_or_string);
-    desc.file_or_string = file_or_string;
-    return desc;
-}
-
+#define VG_PSHADER_DESC(file_or_string, src_format, str_id)\
+    VG_SHADER_DESC(VG_TYPE_PIXEL, file_or_string, src_format, str_id)
 /**
  * @brief A C style constructor for Pixel Shader descriptor.
  * 

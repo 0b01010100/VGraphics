@@ -70,7 +70,6 @@ VG *VG_Create(const char *name, int width, int height)
     return this; 
 }
 
-
 VG_Resource* VG_LoadResource(VG *this_, VG_Resource_Desc* desc, VG_RESULT* err) 
 {
     VG_RESULT e = 0;
@@ -82,9 +81,8 @@ VG_Resource* VG_LoadResource(VG *this_, VG_Resource_Desc* desc, VG_RESULT* err)
 
     VG_Resource* out = NULL;
     e = this_->resourceCtor(this_->api_handle, desc, (void**)&out);
-    if (err && err != 0) {
-        e  = VG_ERROR_OUT_OF_MEMORY; 
-        if(err) *err = e;
+    if (err) {
+       *err = e;
         return NULL;
     }
     return out;

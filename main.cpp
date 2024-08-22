@@ -1,31 +1,17 @@
 #include <VG/inc/VG.h>
 #include <math.h>
 #include <stdlib.h>
-// Vertex Shader source code
-const char* vertexShaderSource = "#version 330 core\n"
-"layout (location = 0) in vec3 aPos;\n"
-"void main()\n"
-"{\n"
-"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-"}\0";
-//Fragment Shader source code
-const char* fragmentShaderSource = "#version 330 core\n"
-"out vec4 FragColor;\n"
-"void main()\n"
-"{\n"
-"   FragColor = vec4(0.8f, 0.3f, 0.02f, 1.0f);\n"
-"}\n\0";
 int main()
 {
     // WINDOW
     VG* vg = VG_Create("new", 300, 300);
 
     // SHADERS
-    VG_Resource_Desc vs_desc = VG_VSHADER_DESC(vertexShaderSource, VG_FALSE, "vs");
+    VG_Resource_Desc vs_desc = VG_VSHADER_DESC(VG_RESOURCES "vs.glsl", VG_SORUCE_FORMAT_FILE, "vs");
     VG_Resource* vs = VG_LoadResource(vg, &vs_desc, 0);
 
 
-    VG_Resource_Desc fs_desc = VG_FSHADER_DESC(fragmentShaderSource, VG_FALSE, "fs");
+    VG_Resource_Desc fs_desc = VG_FSHADER_DESC(VG_RESOURCES "fs.glsl", VG_SORUCE_FORMAT_FILE, "fs");
     VG_Resource* fs = VG_LoadResource(vg, &fs_desc, 0);
 
 
